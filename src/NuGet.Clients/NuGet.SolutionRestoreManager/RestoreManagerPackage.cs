@@ -62,6 +62,8 @@ namespace NuGet.SolutionRestoreManager
             _buildEvents = dte.Events.BuildEvents;
             _buildEvents.OnBuildBegin += BuildEvents_OnBuildBegin;
 
+            await SolutionRestoreCommand.InitializeAsync(this);
+
             await base.InitializeAsync(cancellationToken, progress);
         }
 

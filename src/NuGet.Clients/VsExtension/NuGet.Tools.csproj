@@ -39,7 +39,6 @@
     <DeployExtension>True</DeployExtension>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Commands\RestorePackagesCommand.cs" />
     <Compile Include="DataStreamFromComStream.cs" />
     <Compile Include="FontAndColorsRegistrationAttribute.cs" />
     <Compile Include="Guids.cs" />
@@ -62,7 +61,7 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="ShowErrorsCommand.cs" />
+    <Compile Include="Commands\ShowErrorsCommand.cs" />
     <Compile Include="VisualStudioAccountProvider.cs" />
     <Compile Include="VisualStudioCredentialProvider.cs" />
     <Compile Include="VisualStudioUIContext.cs" />
@@ -344,6 +343,7 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Target Name="AfterBuild">
     <PropertyGroup>
       <PublishDestination>$(ArtifactRoot)\$(VsixOutputDirName)</PublishDestination>

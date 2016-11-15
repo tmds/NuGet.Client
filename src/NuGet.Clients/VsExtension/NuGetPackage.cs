@@ -1,6 +1,16 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.Design;
+using System.Diagnostics;
+using System.Globalization;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Threading;
+using System.Threading.Tasks;
 using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ComponentModelHost;
@@ -18,16 +28,6 @@ using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGetConsole;
 using NuGetConsole.Implementation;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Threading;
-using System.Threading.Tasks;
 using IMachineWideSettings = NuGet.Configuration.IMachineWideSettings;
 using ISettings = NuGet.Configuration.ISettings;
 using Resx = NuGet.PackageManagement.UI.Resources;
@@ -56,7 +56,6 @@ namespace NuGetVSExtension
     [ProvideSearchProvider(typeof(NuGetSearchProvider), "NuGet Search")]
     [ProvideBindingPath] // Definition dll needs to be on VS binding path
     [ProvideAutoLoad(GuidList.guidAutoLoadNuGetString)]
-    [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionBuilding_string)]
     [ProvideAutoLoad(VSConstants.UICONTEXT.ProjectRetargeting_string)]
     [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionOrProjectUpgrading_string)]
     [FontAndColorsRegistration(
@@ -278,7 +277,6 @@ namespace NuGetVSExtension
 
             // Add our command handlers for menu (commands must exist in the .vsct file)
             await AddMenuCommandHandlersAsync();
-            await RestorePackagesCommand.InitializeAsync(this, _outputConsoleLogger);
 
             // IMPORTANT: Do NOT do anything that can lead to a call to ServiceLocator.GetGlobalService().
             // Doing so is illegal and may cause VS to hang.
