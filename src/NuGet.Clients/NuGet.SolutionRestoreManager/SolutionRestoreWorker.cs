@@ -13,9 +13,10 @@ using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Threading;
+using NuGet.PackageManagement.VisualStudio;
 using Task = System.Threading.Tasks.Task;
 
-namespace NuGet.PackageManagement.VisualStudio
+namespace NuGet.SolutionRestoreManager
 {
     /// <summary>
     /// Solution restore job scheduler.
@@ -24,9 +25,9 @@ namespace NuGet.PackageManagement.VisualStudio
     [PartCreationPolicy(CreationPolicy.Shared)]
     internal sealed class SolutionRestoreWorker : ISolutionRestoreWorker, IVsSolutionEvents, IVsSolutionLoadEvents, IDisposable
     {
-        private const int SaneIdleTimeoutMs = 400;
-        private const int SaneRequestQueueLimit = 150;
-        private const int SanePromoteAttemptsLimit = 150;
+        private const int IdleTimeoutMs = 400;
+        private const int RequestQueueLimit = 150;
+        private const int PromoteAttemptsLimit = 150;
 
         private readonly IServiceProvider _serviceProvider;
         private ErrorListProvider _errorListProvider;
@@ -84,13 +85,13 @@ namespace NuGet.PackageManagement.VisualStudio
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-                var dte = _serviceProvider.GetDTE();
+                var dte = serviceProvider.GetDTE();
                 _solutionEvents = dte.Events.SolutionEvents;
                 _solutionEvents.AfterClosing += SolutionEvents_AfterClosing;
 
-                _errorListProvider = new ErrorListProvider(_serviceProvider);
+                _errorListProvider = new ErrorListProvider(serviceProvider);
 #if VS15
-                _vsSolution = serviceProvider.GetService(typeof(SVsSolution)) as IVsSolution;
+                _vsSolution = serviceProvider.GetService<SVsSolution, IVsSolution>();
                 if (_vsSolution == null)
                 {
                     throw new ArgumentNullException(nameof(_vsSolution));
@@ -126,7 +127,7 @@ namespace NuGet.PackageManagement.VisualStudio
                     _vsSolution.UnadviseSolutionEvents(_cookie);
                 }
 #endif
-            });
+            }); 
         }
 
         private void Reset(bool isDisposing = false)
@@ -152,7 +153,7 @@ namespace NuGet.PackageManagement.VisualStudio
                         function: () => StartBackgroundJobRunnerAsync(_workerCts.Token),
                         cancellationToken: _workerCts.Token));
 
-                _pendingRequests = new BlockingCollection<SolutionRestoreRequest>(SaneRequestQueueLimit);
+                _pendingRequests = new BlockingCollection<SolutionRestoreRequest>(RequestQueueLimit);
                 _pendingRestore = new BackgroundRestoreOperation(blockingUi: false);
                 _activeRestoreTask = Task.FromResult(true);
                 _restoreJobContext = new SolutionRestoreJobContext();
@@ -238,7 +239,7 @@ namespace NuGet.PackageManagement.VisualStudio
                             && !token.IsCancellationRequested)
                         {
                             SolutionRestoreRequest discard;
-                            if (!_pendingRequests.TryTake(out discard, SaneIdleTimeoutMs, token))
+                            if (!_pendingRequests.TryTake(out discard, IdleTimeoutMs, token))
                             {
                                 break;
                             }
@@ -295,7 +296,7 @@ namespace NuGet.PackageManagement.VisualStudio
 
             int attempt = 0;
             for (var retry = true;
-                retry && !token.IsCancellationRequested && attempt != SanePromoteAttemptsLimit;
+                retry && !token.IsCancellationRequested && attempt != PromoteAttemptsLimit;
                 attempt++)
             {
                 // Grab local copy of active task
@@ -314,7 +315,7 @@ namespace NuGet.PackageManagement.VisualStudio
                     ref _activeRestoreTask, pendingTask, activeTask) != activeTask;
             }
 
-            if (attempt == SanePromoteAttemptsLimit)
+            if (attempt == PromoteAttemptsLimit)
             {
                 throw new InvalidOperationException("Failed promoting pending task.");
             }
@@ -326,12 +327,16 @@ namespace NuGet.PackageManagement.VisualStudio
             await TaskScheduler.Default;
 
             using (var jobCts = CancellationTokenSource.CreateLinkedTokenSource(token))
-            using (var logger = await RestoreOperationLogger.StartAsync(
-                _serviceProvider, _errorListProvider, blockingUi, jobCts))
-            using (var job = await SolutionRestoreJob.CreateAsync(
-                _serviceProvider, _componentModel, logger, jobCts.Token))
             {
-                return await job.ExecuteAsync(jobArgs, _restoreJobContext, jobCts.Token);
+                var logger = _componentModel.GetService<RestoreOperationLogger>();
+                await logger.StartAsync(
+                    _errorListProvider,
+                    useBlockingUi: false,
+                    useConsoleOutput: true,
+                    cts: jobCts);
+
+                var job = _componentModel.GetService<ISolutionRestoreJob>();
+                return await job.ExecuteAsync(jobArgs, _restoreJobContext, logger, jobCts.Token);
             }
         }
 

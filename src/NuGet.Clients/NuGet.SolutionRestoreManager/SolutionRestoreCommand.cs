@@ -27,7 +27,7 @@ namespace NuGet.SolutionRestoreManager
         private const int CommandId = 0x300; // cmdidRestorePackages
         private static readonly Guid CommandSet = new Guid("25fd982b-8cae-4cbd-a440-e03ffccde106"); // guidNuGetDialogCmdSet;
 
-        private readonly INuGetUILogger _logger;
+        private readonly Lazy<INuGetUILogger> _logger;
         private readonly Lazy<ISolutionRestoreWorker> _restoreWorker;
         private readonly Lazy<ISolutionManager> _solutionManager;
         private readonly Lazy<IConsoleStatus> _consoleStatus;
@@ -42,10 +42,10 @@ namespace NuGet.SolutionRestoreManager
         private SolutionRestoreCommand(
             IComponentModel componentModel,
             IMenuCommandService commandService,
-            IVsMonitorSelection vsMonitorSelection,
-            INuGetUILogger logger)
+            IVsMonitorSelection vsMonitorSelection)
         {
-            _logger = logger;
+            _logger = new Lazy<INuGetUILogger>(
+                () => componentModel.GetService<INuGetUILogger>());
 
             _restoreWorker = new Lazy<ISolutionRestoreWorker>(
                 () => componentModel.GetService<ISolutionRestoreWorker>());
@@ -83,10 +83,7 @@ namespace NuGet.SolutionRestoreManager
             var commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as IMenuCommandService;
             var vsMonitorSelection = await package.GetServiceAsync(typeof(IVsMonitorSelection)) as IVsMonitorSelection;
 
-            var serviceProvider = await package.GetServiceAsync(typeof(SVsServiceProvider)) as IServiceProvider;
-            var logger = new OutputConsoleLogger(serviceProvider);
-
-            _instance = new SolutionRestoreCommand(componentModel, commandService, vsMonitorSelection, logger);
+            _instance = new SolutionRestoreCommand(componentModel, commandService, vsMonitorSelection);
         }
 
         /// <summary>
@@ -106,7 +103,7 @@ namespace NuGet.SolutionRestoreManager
             {
                 // QueryStatus should disable the context menu in most of the cases.
                 // Except when NuGetPackage was not loaded before VS won't send QueryStatus.
-                _logger.Log(MessageLevel.Info, Resources.SolutionRestoreFailed_RestoreWorkerIsBusy);
+                _logger.Value.Log(MessageLevel.Info, Resources.SolutionRestoreFailed_RestoreWorkerIsBusy);
             }
         }
 

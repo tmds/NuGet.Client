@@ -3,37 +3,41 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Threading;
 using NuGet.Commands;
 using NuGet.Configuration;
+using NuGet.PackageManagement;
 using NuGet.PackageManagement.UI;
+using NuGet.PackageManagement.VisualStudio;
 using NuGet.ProjectManagement;
 using NuGet.ProjectManagement.Projects;
 using NuGet.Protocol.Core.Types;
+using Strings = NuGet.PackageManagement.VisualStudio.Strings;
 using Task = System.Threading.Tasks.Task;
 
-namespace NuGet.PackageManagement.VisualStudio
+namespace NuGet.SolutionRestoreManager
 {
     /// <summary>
     /// Implementation of solution restore operation as executed by the <see cref="SolutionRestoreWorker"/>.
     /// Designed to be called only once during its lifetime.
     /// </summary>
-    internal sealed class SolutionRestoreJob : ISolutionRestoreJob, IDisposable
+    [Export(typeof(ISolutionRestoreJob))]
+    internal sealed class SolutionRestoreJob : ISolutionRestoreJob
     {
-        private readonly EnvDTE.DTE _dte;
+        private readonly IServiceProvider _serviceProvider;
         private readonly IPackageRestoreManager _packageRestoreManager;
         private readonly ISolutionManager _solutionManager;
         private readonly ISourceRepositoryProvider _sourceRepositoryProvider;
         private readonly ISettings _settings;
-        private readonly RestoreOperationLogger _logger;
 
+        private RestoreOperationLogger _logger;
         private int _dependencyGraphProjectCacheHash;
         private INuGetProjectContext _nuGetProjectContext;
 
@@ -55,69 +59,45 @@ namespace NuGet.PackageManagement.VisualStudio
         private int _totalCount;
         private int _currentCount;
 
-        private SolutionRestoreJob(
+        [ImportingConstructor]
+        public SolutionRestoreJob(
+            [Import(typeof(SVsServiceProvider))]
             IServiceProvider serviceProvider,
-            IComponentModel componentModel,
-            RestoreOperationLogger logger)
-        {
-            _packageRestoreManager = componentModel.GetService<IPackageRestoreManager>();
-
-            if (_packageRestoreManager == null)
-            {
-                throw new ArgumentNullException(nameof(_packageRestoreManager));
-            }
-
-            _solutionManager = componentModel.GetService<IVsSolutionManager>();
-
-            if (_solutionManager == null)
-            {
-                throw new ArgumentNullException(nameof(_solutionManager));
-            }
-
-            _sourceRepositoryProvider = componentModel.GetService<ISourceRepositoryProvider>();
-
-            if (_sourceRepositoryProvider == null)
-            {
-                throw new ArgumentNullException(nameof(_sourceRepositoryProvider));
-            }
-
-            _settings = componentModel.GetService<ISettings>();
-
-            if (_settings == null)
-            {
-                throw new ArgumentNullException(nameof(_settings));
-            }
-
-            _dte = serviceProvider.GetDTE();
-            _logger = logger;
-        }
-
-        public static async Task<SolutionRestoreJob> CreateAsync(
-            IServiceProvider serviceProvider,
-            IComponentModel componentModel,
-            RestoreOperationLogger logger,
-            CancellationToken token)
+            IPackageRestoreManager packageRestoreManager,
+            IVsSolutionManager solutionManager,
+            ISourceRepositoryProvider sourceRepositoryProvider,
+            ISettings settings)
         {
             if (serviceProvider == null)
             {
                 throw new ArgumentNullException(nameof(serviceProvider));
             }
 
-            if (componentModel == null)
+            if (packageRestoreManager == null)
             {
-                throw new ArgumentNullException(nameof(componentModel));
+                throw new ArgumentNullException(nameof(packageRestoreManager));
             }
 
-            if (logger == null)
+            if (solutionManager == null)
             {
-                throw new ArgumentNullException(nameof(logger));
+                throw new ArgumentNullException(nameof(solutionManager));
             }
 
-            return await ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
+            if (sourceRepositoryProvider == null)
             {
-                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                return new SolutionRestoreJob(serviceProvider, componentModel, logger);
-            });
+                throw new ArgumentNullException(nameof(sourceRepositoryProvider));
+            }
+
+            if (settings == null)
+            {
+                throw new ArgumentNullException(nameof(settings));
+            }
+
+            _serviceProvider = serviceProvider;
+            _packageRestoreManager = packageRestoreManager;
+            _solutionManager = solutionManager;
+            _sourceRepositoryProvider = sourceRepositoryProvider;
+            _settings = settings;
         }
 
         /// <summary>
@@ -126,8 +106,26 @@ namespace NuGet.PackageManagement.VisualStudio
         public async Task<bool> ExecuteAsync(
             SolutionRestoreRequest request,
             SolutionRestoreJobContext jobContext,
+            RestoreOperationLogger logger,
             CancellationToken token)
         {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            if (jobContext == null)
+            {
+                throw new ArgumentNullException(nameof(jobContext));
+            }
+
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            _logger = logger;
+
             // update instance attributes with the shared context values
             _dependencyGraphProjectCacheHash = jobContext.DependencyGraphProjectCacheHash;
             _nuGetProjectContext = jobContext.NuGetProjectContext;
@@ -261,7 +259,7 @@ namespace NuGet.PackageManagement.VisualStudio
                 {
                     // Only write the PackageRestoreOptOutMessage to output window,
                     // if, there are packages to restore
-                    l.WriteLine(VerbosityLevel.Quiet, Strings.PackageRestoreOptOutMessage);
+                    l.WriteLine(VerbosityLevel.Quiet, Resources.PackageRestoreOptOutMessage);
                 });
             }
         }
@@ -289,7 +287,7 @@ namespace NuGet.PackageManagement.VisualStudio
                         {
                             var message = string.Format(
                                 CultureInfo.CurrentCulture,
-                                Strings.RelativeGlobalPackagesFolder,
+                                Resources.RelativeGlobalPackagesFolder,
                                 globalPackagesFolder);
 
                             l.WriteLine(VerbosityLevel.Quiet, message);
@@ -375,7 +373,7 @@ namespace NuGet.PackageManagement.VisualStudio
                     progress?.ReportProgress(
                         string.Format(
                             CultureInfo.CurrentCulture,
-                            Strings.RestoredPackage,
+                            Resources.RestoredPackage,
                             packageIdentity),
                         (uint)_currentCount,
                         (uint)_totalCount);
@@ -412,12 +410,12 @@ namespace NuGet.PackageManagement.VisualStudio
                                 : args.Exception.Message;
                         var message = string.Format(
                             CultureInfo.CurrentCulture,
-                            Strings.PackageRestoreFailedForProject,
+                            Resources.PackageRestoreFailedForProject,
                             projectName,
                             exceptionMessage);
                         l.WriteLine(VerbosityLevel.Quiet, message);
                         l.ShowError(message);
-                        l.WriteLine(VerbosityLevel.Normal, Strings.PackageRestoreFinishedForProject, projectName);
+                        l.WriteLine(VerbosityLevel.Normal, Resources.PackageRestoreFinishedForProject, projectName);
                     }
                 });
             }
@@ -504,7 +502,7 @@ namespace NuGet.PackageManagement.VisualStudio
                 {
                     var errorText = string.Format(
                         CultureInfo.CurrentCulture,
-                        Strings.PackageNotRestoredBecauseOfNoConsent,
+                        Resources.PackageNotRestoredBecauseOfNoConsent,
                         string.Join(", ", missingPackages.Select(p => p.ToString())));
                     l.ShowError(errorText);
                 });
@@ -560,7 +558,7 @@ namespace NuGet.PackageManagement.VisualStudio
                 {
                     l.WriteLine(
                         forceStatusWrite ? VerbosityLevel.Quiet : VerbosityLevel.Minimal,
-                        Strings.PackageRestoreCanceled);
+                        Resources.PackageRestoreCanceled);
 
                     return;
                 }
@@ -570,7 +568,7 @@ namespace NuGet.PackageManagement.VisualStudio
                 {
                     l.WriteLine(
                         forceStatusWrite ? VerbosityLevel.Quiet : VerbosityLevel.Detailed,
-                        Strings.NothingToRestore);
+                        Resources.NothingToRestore);
 
                     return;
                 }
@@ -580,13 +578,13 @@ namespace NuGet.PackageManagement.VisualStudio
                 {
                     l.WriteLine(
                         forceStatusWrite ? VerbosityLevel.Quiet : VerbosityLevel.Minimal,
-                        Strings.PackageRestoreFinishedWithError);
+                        Resources.PackageRestoreFinishedWithError);
                 }
                 else
                 {
                     l.WriteLine(
                         forceStatusWrite ? VerbosityLevel.Quiet : VerbosityLevel.Normal,
-                        Strings.PackageRestoreFinished);
+                        Resources.PackageRestoreFinished);
                 }
             });
         }
@@ -597,16 +595,13 @@ namespace NuGet.PackageManagement.VisualStudio
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-                var projects = _dte.Solution.Projects;
+                var dte = _serviceProvider.GetDTE();
+                var projects = dte.Solution.Projects;
                 return projects
                     .OfType<EnvDTE.Project>()
                     .Select(p => new ProjectInfo(EnvDTEProjectUtility.GetFullPath(p), p.Name))
                     .Any(p => p.CheckPackagesConfig());
             });
-        }
-
-        public void Dispose()
-        {
         }
 
         private class ProjectInfo

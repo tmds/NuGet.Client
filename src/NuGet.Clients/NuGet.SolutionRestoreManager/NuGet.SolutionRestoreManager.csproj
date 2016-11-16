@@ -22,6 +22,9 @@
     <Reference Include="envdte, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
+    <Reference Include="envdte80, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -32,13 +35,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ISolutionRestoreJob.cs" />
     <Compile Include="RestoreManagerPackage.cs" />
+    <Compile Include="RestoreOperationLogger.cs" />
+    <Compile Include="RestoreOperationProgressUI.cs" />
     <Compile Include="SolutionRestoreCommand.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="SolutionRestoreJob.cs" />
+    <Compile Include="SolutionRestoreJobContext.cs" />
+    <Compile Include="SolutionRestoreWorker.cs" />
+    <Compile Include="VerbosityLevel.cs" />
     <Compile Include="VsSolutionRestoreService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -83,11 +93,6 @@
   </Choose>
   <ItemGroup>
     <None Include="project.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <VSCTCompile Include="Menus.vsct">
-      <ResourceName>Menus.ctmenu</ResourceName>
-    </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources.resx">

@@ -89,18 +89,6 @@
           <ButtonText>Manage &amp;NuGet Packages for Solution...</ButtonText>
         </Strings>
       </Button>
-<!--
-      <Button guid="guidDialogCmdSet" id="cmdidRestorePackages" priority="0x0300" type="Button">
-        <Parent guid="guidReferenceContext" id="cmdAddReferenceGroup" />
-        <Icon guid="guidToolbarImages" id="bmpPackageRestore" />
-        <CommandFlag>DefaultInvisible</CommandFlag>
-        <CommandFlag>DynamicVisibility</CommandFlag>
-        <Strings>
-          <CommandName>cmdRestorePackages</CommandName>
-          <ButtonText>Restore NuGet Packa&amp;ges</ButtonText>
-        </Strings>
-      </Button>
--->
 
       <Button guid="guidToolsGroup" id="idGeneralSettings" priority="0xF200" type="Button">
         <Parent guid="guidToolsGroup" id="idToolsGroup"/>
@@ -155,7 +143,8 @@
     <VisibilityItem guid="guidDialogCmdSet" id="cmdidAddPackages" context="UICONTEXT_SolutionExistsAndNotBuildingAndNotDebugging" />
     <VisibilityItem guid="guidDialogCmdSet" id="cmdidAddPackagesForSolution" context="UICONTEXT_SolutionExistsAndNotBuildingAndNotDebugging" />
     <VisibilityItem guid="guidDialogCmdSet" id="cmdidRestorePackages" context="UICONTEXT_SolutionExistsAndNotBuildingAndNotDebugging" />
-    <VisibilityItem guid="guidToolsGroup" id="cmdIdVisualizer" context="UICONTEXT_SolutionExists" />
+    <VisibilityItem guid="guidDialogCmdSet" id="cmdidRestorePackages" context="UICONTEXT_SolutionHasSingleProject" />
+    <VisibilityItem guid="guidDialogCmdSet" id="cmdidRestorePackages" context="UICONTEXT_SolutionHasMultipleProjects" />
   </VisibilityConstraints>
 
   <CommandPlacements>
@@ -227,7 +216,6 @@
       <IDSymbol name="idLibraryPackageManager" value="0x100" />
       <IDSymbol name="idToolsGroup" value="0x200" />
       <IDSymobl name="idGeneralSettings" value="0x300" />
-      <IDSymobl name="cmdIdVisualizer" value="0x310" />
     </GuidSymbol>
     <GuidSymbol name="guidDialogCmdSet" value="{25fd982b-8cae-4cbd-a440-e03ffccde106}">
       <IDSymbol name="cmdidAddPackages" value="0x0100" />

@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.ComponentModel.Composition;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
@@ -11,59 +12,58 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.Common;
+using NuGet.PackageManagement.VisualStudio;
+using NuGetConsole;
 using Task = System.Threading.Tasks.Task;
 
-namespace NuGet.PackageManagement.VisualStudio
+namespace NuGet.SolutionRestoreManager
 {
     /// <summary>
     /// Aggregates logging and UI services consumed by the <see cref="SolutionRestoreJob"/>.
     /// </summary>
-    internal sealed class RestoreOperationLogger : ILogger, IDisposable
+    [Export(typeof(RestoreOperationLogger))]
+    internal sealed class RestoreOperationLogger : ILogger
     {
-        private static readonly string BuildWindowPaneGuid = VSConstants.BuildOutput.ToString("B");
-
         private readonly IServiceProvider _serviceProvider;
-        private readonly ErrorListProvider _errorListProvider;
-        private readonly EnvDTE.OutputWindowPane _outputWindowPane;
-        private readonly Func<CancellationToken, Task<RestoreOperationProgressUI>> _progressFactory;
-        private readonly CancellationTokenSource _externalCts;
+        private readonly IOutputConsoleProvider _outputConsoleProvider;
+
+        private ErrorListProvider _errorListProvider;
+        private CancellationTokenSource _externalCts;
+        private Func<CancellationToken, Task<RestoreOperationProgressUI>> _progressFactory;
+        private RestoreOutputWriter _outputWriter;
 
         private bool _cancelled;
 
         // The value of the "MSBuild project build output verbosity" setting
         // of VS. From 0 (quiet) to 4 (Diagnostic).
-        public int OutputVerbosity { get; }
+        public int OutputVerbosity { get; private set; }
 
-        private RestoreOperationLogger(
+        [ImportingConstructor]
+        public RestoreOperationLogger(
+            [Import(typeof(SVsServiceProvider))]
             IServiceProvider serviceProvider,
-            ErrorListProvider errorListProvider,
-            EnvDTE.OutputWindowPane outputWindowPane,
-            Func<CancellationToken, Task<RestoreOperationProgressUI>> progressFactory,
-            int outputVerbosity,
-            CancellationTokenSource cts)
-        {
-            _serviceProvider = serviceProvider;
-            _errorListProvider = errorListProvider;
-            _progressFactory = progressFactory;
-            _outputWindowPane = outputWindowPane;
-
-            _externalCts = cts;
-            _externalCts.Token.Register(() => _cancelled = true);
-
-            OutputVerbosity = outputVerbosity;
-        }
-
-        public static async Task<RestoreOperationLogger> StartAsync(
-            IServiceProvider serviceProvider,
-            ErrorListProvider errorListProvider,
-            bool blockingUi,
-            CancellationTokenSource cts)
+            IOutputConsoleProvider outputConsoleProvider)
         {
             if (serviceProvider == null)
             {
                 throw new ArgumentNullException(nameof(serviceProvider));
             }
 
+            if (outputConsoleProvider == null)
+            {
+                throw new ArgumentNullException(nameof(outputConsoleProvider));
+            }
+
+            _serviceProvider = serviceProvider;
+            _outputConsoleProvider = outputConsoleProvider;
+        }
+
+        public async Task StartAsync(
+            ErrorListProvider errorListProvider,
+            bool useBlockingUi,
+            bool useConsoleOutput,
+            CancellationTokenSource cts)
+        {
             if (errorListProvider == null)
             {
                 throw new ArgumentNullException(nameof(errorListProvider));
@@ -74,37 +74,37 @@ namespace NuGet.PackageManagement.VisualStudio
                 throw new ArgumentNullException(nameof(cts));
             }
 
-            var msbuildOutputVerbosity = await GetMSBuildOutputVerbositySettingAsync(serviceProvider);
+            _errorListProvider = errorListProvider;
+            _externalCts = cts;
+            _externalCts.Token.Register(() => _cancelled = true);
 
-            var buildOutputPane = await GetBuildOutputPaneAsync(serviceProvider);
-
-            Func<CancellationToken, Task<RestoreOperationProgressUI>> progressFactory;
-            if (blockingUi)
+            if (useBlockingUi)
             {
-                progressFactory = t => WaitDialogProgress.StartAsync(serviceProvider, t);
+                _progressFactory = t => WaitDialogProgress.StartAsync(_serviceProvider, t);
             }
             else
             {
-                progressFactory = t => StatusBarProgress.StartAsync(serviceProvider, t);
+                _progressFactory = t => StatusBarProgress.StartAsync(_serviceProvider, t);
             }
 
             await ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+                OutputVerbosity = GetMSBuildOutputVerbositySetting(_serviceProvider);
+
+                if (useConsoleOutput)
+                {
+                    _outputWriter = new OutputConsoleWriter(_outputConsoleProvider);
+                }
+                else
+                {
+                    _outputWriter = new BuildOutputPaneWriter(_serviceProvider);
+                }
+                _outputWriter.OutputVerbosity = OutputVerbosity;
+
                 errorListProvider.Tasks.Clear();
             });
-
-            return new RestoreOperationLogger(
-                serviceProvider, 
-                errorListProvider,
-                buildOutputPane,
-                progressFactory, 
-                msbuildOutputVerbosity,
-                cts);
-        }
-
-        public void Dispose()
-        {
         }
 
         public void LogDebug(string data)
@@ -209,30 +209,7 @@ namespace NuGet.PackageManagement.VisualStudio
         /// <param name="args">An array of objects to write using format. </param>
         public void WriteLine(VerbosityLevel verbosity, string format, params object[] args)
         {
-            ThreadHelper.ThrowIfNotOnUIThread();
-
-            if (OutputVerbosity >= (int)verbosity && _outputWindowPane != null)
-            {
-                _outputWindowPane.OutputString(string.Format(CultureInfo.CurrentCulture, format, args));
-                _outputWindowPane.OutputString(Environment.NewLine);
-            }
-        }
-
-        private static async Task<EnvDTE.OutputWindowPane> GetBuildOutputPaneAsync(IServiceProvider serviceProvider)
-        {
-            return await ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
-            {
-                // Switch to main thread to use DTE
-                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
-                var dte2 = (DTE2)serviceProvider.GetDTE();
-                var pane = dte2.ToolWindows.OutputWindow
-                    .OutputWindowPanes
-                    .Cast<EnvDTE.OutputWindowPane>()
-                    .FirstOrDefault(p => StringComparer.OrdinalIgnoreCase.Equals(p.Guid, BuildWindowPaneGuid));
-                pane?.Activate();
-                return pane;
-            });
+            _outputWriter.WriteLine(verbosity, format, args);
         }
 
         public Task LogExceptionAsync(Exception ex, bool logError)
@@ -243,13 +220,13 @@ namespace NuGet.PackageManagement.VisualStudio
                 if (OutputVerbosity < 3)
                 {
                     message = string.Format(CultureInfo.CurrentCulture,
-                        Strings.ErrorOccurredRestoringPackages,
+                        Resources.ErrorOccurredRestoringPackages,
                         ex.Message);
                 }
                 else
                 {
                     // output exception detail when _msBuildOutputVerbosity is >= Detailed.
-                    message = string.Format(CultureInfo.CurrentCulture, Strings.ErrorOccurredRestoringPackages, ex);
+                    message = string.Format(CultureInfo.CurrentCulture, Resources.ErrorOccurredRestoringPackages, ex);
                 }
 
                 if (logError)
@@ -347,23 +324,19 @@ namespace NuGet.PackageManagement.VisualStudio
         /// <remarks>
         /// 0 is Quiet, while 4 is diagnostic.
         /// </remarks>
-        private static async Task<int> GetMSBuildOutputVerbositySettingAsync(IServiceProvider serviceProvider)
+        private static int GetMSBuildOutputVerbositySetting(IServiceProvider serviceProvider)
         {
-            return await ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
+            ThreadHelper.ThrowIfNotOnUIThread();
+
+            var dte = serviceProvider.GetDTE();
+
+            var properties = dte.get_Properties("Environment", "ProjectsAndSolution");
+            var value = properties.Item("MSBuildOutputVerbosity").Value;
+            if (value is int)
             {
-                // Switch to main thread to use DTE
-                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
-                var dte = serviceProvider.GetDTE();
-
-                var properties = dte.get_Properties("Environment", "ProjectsAndSolution");
-                var value = properties.Item("MSBuildOutputVerbosity").Value;
-                if (value is int)
-                {
-                    return (int)value;
-                }
-                return 0;
-            });
+                return (int)value;
+            }
+            return 0;
         }
 
         private class WaitDialogProgress : RestoreOperationProgressUI
@@ -386,9 +359,9 @@ namespace NuGet.PackageManagement.VisualStudio
                         SVsThreadedWaitDialogFactory, IVsThreadedWaitDialogFactory>();
 
                     var session = waitDialogFactory.StartWaitDialog(
-                        waitCaption: Strings.DialogTitle,
+                        waitCaption: Resources.DialogTitle,
                         initialProgress: new ThreadedWaitDialogProgressData(
-                            Strings.RestoringPackages,
+                            Resources.RestoringPackages,
                             progressText: string.Empty,
                             statusBarText: string.Empty,
                             isCancelable: true,
@@ -461,7 +434,7 @@ namespace NuGet.PackageManagement.VisualStudio
                     statusBar.Animation(1, ref icon);
 
                     RestoreOperationProgressUI progress = new StatusBarProgress(statusBar);
-                    progress.ReportProgress(Strings.RestoringPackages);
+                    progress.ReportProgress(Resources.RestoringPackages);
 
                     return progress;
                 });
@@ -501,6 +474,70 @@ namespace NuGet.PackageManagement.VisualStudio
                 if (totalSteps != 0)
                 {
                     StatusBar.Progress(ref cookie, 1, "", currentStep, totalSteps);
+                }
+            }
+        }
+
+        private abstract class RestoreOutputWriter
+        {
+            public int OutputVerbosity { get; set; }
+
+            public abstract void WriteLine(VerbosityLevel verbosity, string format, params object[] args);
+        }
+
+        private class BuildOutputPaneWriter : RestoreOutputWriter
+        {
+            private static readonly string BuildWindowPaneGuid = VSConstants.BuildOutput.ToString("B");
+            private readonly EnvDTE.OutputWindowPane _outputWindowPane;
+
+            public BuildOutputPaneWriter(IServiceProvider serviceProvider)
+            {
+                ThreadHelper.ThrowIfNotOnUIThread();
+
+                _outputWindowPane = GetBuildOutputPane(serviceProvider);
+            }
+
+            public override void WriteLine(VerbosityLevel verbosity, string format, params object[] args)
+            {
+                ThreadHelper.ThrowIfNotOnUIThread();
+
+                if (OutputVerbosity >= (int)verbosity && _outputWindowPane != null)
+                {
+                    _outputWindowPane.OutputString(string.Format(CultureInfo.CurrentCulture, format, args));
+                    _outputWindowPane.OutputString(Environment.NewLine);
+                }
+            }
+
+            private static EnvDTE.OutputWindowPane GetBuildOutputPane(IServiceProvider serviceProvider)
+            {
+                var dte2 = (DTE2)serviceProvider.GetDTE();
+                var pane = dte2.ToolWindows.OutputWindow
+                    .OutputWindowPanes
+                    .Cast<EnvDTE.OutputWindowPane>()
+                    .FirstOrDefault(p => StringComparer.OrdinalIgnoreCase.Equals(p.Guid, BuildWindowPaneGuid));
+                pane?.Activate();
+                return pane;
+            }
+        }
+
+        private class OutputConsoleWriter : RestoreOutputWriter
+        {
+            private readonly IConsole _console;
+
+            public OutputConsoleWriter(IOutputConsoleProvider outputConsoleProvider)
+            {
+                ThreadHelper.ThrowIfNotOnUIThread();
+
+                _console = outputConsoleProvider.CreateOutputConsole(requirePowerShellHost: false);
+            }
+
+            public override void WriteLine(VerbosityLevel verbosity, string format, params object[] args)
+            {
+                ThreadHelper.ThrowIfNotOnUIThread();
+
+                if (OutputVerbosity >= (int)verbosity && _console != null)
+                {
+                    _console.WriteLine(string.Format(CultureInfo.CurrentCulture, format, args));
                 }
             }
         }

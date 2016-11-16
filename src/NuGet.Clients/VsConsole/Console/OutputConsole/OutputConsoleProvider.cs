@@ -6,6 +6,7 @@ using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Linq;
 using Microsoft.VisualStudio.ComponentModelHost;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.PackageManagement.VisualStudio;
 
@@ -14,14 +15,28 @@ namespace NuGetConsole
     [Export(typeof(IOutputConsoleProvider))]
     public class OutputConsoleProvider : IOutputConsoleProvider
     {
+        private readonly IServiceProvider _serviceProvider;
+
         private IConsole _console;
+
+        [ImportingConstructor]
+        OutputConsoleProvider(
+            [Import(typeof(SVsServiceProvider))]
+            IServiceProvider serviceProvider)
+        {
+            if (serviceProvider == null)
+            {
+                throw new ArgumentNullException(nameof(serviceProvider));
+            }
+
+            _serviceProvider = serviceProvider;
+        }
 
         public IConsole CreateOutputConsole(bool requirePowerShellHost)
         {
             if (_console == null)
             {
-                var serviceProvider = ServiceLocator.GetInstance<IServiceProvider>();
-                var outputWindow = (IVsOutputWindow)serviceProvider.GetService(typeof(SVsOutputWindow));
+                var outputWindow = _serviceProvider.GetService<SVsOutputWindow, IVsOutputWindow>();
                 Debug.Assert(outputWindow != null);
 
                 _console = new OutputConsole(outputWindow);
@@ -37,7 +52,7 @@ namespace NuGetConsole
             return _console;
         }
 
-        private static IHostProvider GetPowerShellHostProvider()
+        private IHostProvider GetPowerShellHostProvider()
         {
             // The PowerConsole design enables multiple hosts (PowerShell, Python, Ruby)
             // For the Output window console, we're only interested in the PowerShell host. 
@@ -46,7 +61,7 @@ namespace NuGetConsole
             // The PowerShell host provider name is defined in PowerShellHostProvider.cs
             const string PowerShellHostProviderName = "NuGetConsole.Host.PowerShell";
 
-            var componentModel = ServiceLocator.GetGlobalService<SComponentModel, IComponentModel>();
+            var componentModel = _serviceProvider.GetService<SComponentModel, IComponentModel>();
             var exportProvider = componentModel.DefaultExportProvider;
             var hostProviderExports = exportProvider.GetExports<IHostProvider, IHostMetadata>();
             var psProvider = hostProviderExports.Single(export => export.Metadata.HostName == PowerShellHostProviderName);

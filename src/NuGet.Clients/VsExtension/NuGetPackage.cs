@@ -47,10 +47,6 @@ namespace NuGetVSExtension
         Style = VsDockStyle.Tabbed,
         Window = "{34E76E81-EE4A-11D0-AE2E-00A0C90FFFC3}", // this is the guid of the Output tool window, which is present in both VS and VWD
         Orientation = ToolWindowOrientation.Right)]
-    //[ProvideToolWindow(typeof(DebugConsoleToolWindow),
-    //    Style = VsDockStyle.Tabbed,
-    //    Window = "{34E76E81-EE4A-11D0-AE2E-00A0C90FFFC3}",      // this is the guid of the debug tool window, which is present in both VS and VWD
-    //    Orientation = ToolWindowOrientation.Right)]
     [ProvideOptionPage(typeof(PackageSourceOptionsPage), "NuGet Package Manager", "Package Sources", 113, 114, true)]
     [ProvideOptionPage(typeof(GeneralOptionPage), "NuGet Package Manager", "General", 113, 115, true)]
     [ProvideSearchProvider(typeof(NuGetSearchProvider), "NuGet Search")]
@@ -97,7 +93,7 @@ namespace NuGetVSExtension
 
         private NuGetSettings _nugetSettings;
 
-        private OutputConsoleLogger _outputConsoleLogger;
+        private INuGetUILogger _outputConsoleLogger;
         private readonly HashSet<Uri> _credentialRequested;
 
         public NuGetPackage()
@@ -269,12 +265,6 @@ namespace NuGetVSExtension
             Styles.LoadVsStyles();
             Brushes.LoadVsBrushes();
 
-            _outputConsoleLogger = new OutputConsoleLogger(this);
-
-            // ***
-            // VsNuGetDiagnostics.Initialize(
-            //    ServiceLocator.GetInstance<IDebugConsoleController>());
-
             // Add our command handlers for menu (commands must exist in the .vsct file)
             await AddMenuCommandHandlersAsync();
 
@@ -291,12 +281,15 @@ namespace NuGetVSExtension
 
             if (SolutionManager != null)
             {
-                SolutionManager.SolutionOpened += (obj, ev) =>
+                SolutionManager.SolutionOpened += (_, __) =>
                     {
                         _nugetSettings = new NuGetSettings();
                         LoadNuGetSettings();
                     };
             }
+
+            _outputConsoleLogger = componentModel.GetService<INuGetUILogger>();
+            Debug.Assert(_outputConsoleLogger != null);
 
             _uiProjectContext = new NuGetUIProjectContext(
                 _outputConsoleLogger,
@@ -416,7 +409,8 @@ namespace NuGetVSExtension
         private void LogCredentialProviderError(Exception exception, string failureMessage)
         {
             // Log the user-friendly message to the output console (no stack trace).
-            _outputConsoleLogger.OutputConsole.WriteLine(
+            _outputConsoleLogger.Log(
+                MessageLevel.Error,
                 failureMessage +
                 Environment.NewLine +
                 ExceptionUtilities.DisplayMessage(exception));

@@ -4,7 +4,7 @@
 using System;
 using System.Threading;
 
-namespace NuGet.PackageManagement.VisualStudio
+namespace NuGet.SolutionRestoreManager
 {
     internal abstract class RestoreOperationProgressUI : IDisposable
     {
