@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using Microsoft.Extensions.CommandLineUtils;
 
-#if IS_CORECLR
+#if !NETFRAMEWORK
 using System.Runtime.InteropServices;
 #endif
 
@@ -63,7 +63,7 @@ namespace NuGet.CommandLine.XPlat
 
         public static void SetUserAgent()
         {
-#if IS_CORECLR
+#if !NETFRAMEWORK
             UserAgent.SetUserAgentString(new UserAgentStringBuilder("NuGet xplat")
                 .WithOSDescription(RuntimeInformation.OSDescription));
 #else

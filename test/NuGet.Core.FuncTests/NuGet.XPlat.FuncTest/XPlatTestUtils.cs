@@ -128,7 +128,7 @@ namespace NuGet.XPlat.FuncTest
         {
             var safeSettings = new XmlReaderSettings
             {
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
                 XmlResolver = null,
 #endif
                 DtdProcessing = DtdProcessing.Prohibit,

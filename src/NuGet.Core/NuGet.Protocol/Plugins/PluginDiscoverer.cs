@@ -147,7 +147,7 @@ namespace NuGet.Protocol.Plugins
             if (string.IsNullOrEmpty(_rawPluginPaths))
             {
                 var directories = new List<string> { PluginDiscoveryUtility.GetNuGetHomePluginsPath() };
-#if IS_DESKTOP
+#if NETFRAMEWORK
                 // Internal plugins are only supported for .NET Framework scenarios, namely msbuild.exe
                 directories.Add(PluginDiscoveryUtility.GetInternalPlugins());
 #endif

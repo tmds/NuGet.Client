@@ -1380,7 +1380,7 @@ Description is required.");
             string spec4 = @"<?xml version=""1.0"" encoding=""utf-8""?><package><metadata></metadata></package>";
 
             // Switch to invariant culture to ensure the error message is in english.
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             // REVIEW: Unsupported on CoreCLR
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 #endif
@@ -1388,7 +1388,7 @@ Description is required.");
             // Act and Assert
             ExceptionAssert.Throws<XmlException>(() => new PackageBuilder(spec1.AsStream(), null), "Data at the root level is invalid. Line 1, position 1.");
             ExceptionAssert.Throws<XmlException>(() => new PackageBuilder(spec2.AsStream(), null), "Root element is missing.");
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec3.AsStream(), null));
             ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec4.AsStream(), null));
 #else
@@ -1410,13 +1410,13 @@ Description is required.");
   </metadata></package>";
 
             // Switch to invariant culture to ensure the error message is in english.
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             // REVIEW: Unsupported on CoreCLR
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 #endif
 
             // Act & Assert
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             ExceptionAssert.Throws<InvalidOperationException>(
                 () => new PackageBuilder(spec.AsStream(), null),
                 "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. " +
@@ -1441,13 +1441,13 @@ Description is required.");
   </metadata></package>";
 
             // Switch to invariant culture to ensure the error message is in english.
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             // REVIEW: Unsupported on CoreCLR
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 #endif
 
             // Act & Assert
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             var exception = Assert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null));
             Assert.StartsWith(
                 "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has invalid child element 'ID' " +
@@ -1491,13 +1491,13 @@ Description is required.");
   </metadata></package>";
 
             // Switch to invariant culture to ensure the error message is in english.
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             // REVIEW: Unsupported on CoreCLR
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 #endif
 
             // Act & Assert
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             ExceptionAssert.Throws<InvalidOperationException>(
                 () => new PackageBuilder(spec.AsStream(), null),
                 "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. " +
@@ -1521,13 +1521,13 @@ Description is required.");
   </metadata></package>";
 
             // Switch to invariant culture to ensure the error message is in english.
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             // REVIEW: Unsupported on CoreCLR
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 #endif
 
             // Act & Assert
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             ExceptionAssert.Throws<InvalidOperationException>(
                 () => new PackageBuilder(spec.AsStream(), null),
                 "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. " +
@@ -1551,13 +1551,13 @@ Description is required.");
   </metadata></package>";
 
             // Switch to invariant culture to ensure the error message is in english.
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             // REVIEW: Unsupported on CoreCLR
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 #endif
 
             // Act & Assert
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             ExceptionAssert.Throws<InvalidOperationException>(
                 () => new PackageBuilder(spec.AsStream(), null),
                 "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. " +
@@ -1572,13 +1572,13 @@ Description is required.");
         public void MalformedDependenciesThrows()
         {
             // Switch to invariant culture to ensure the error message is in english.
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             // REVIEW: Unsupported on CoreCLR
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 #endif
 
             // Act & Assert
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
@@ -1629,13 +1629,13 @@ Description is required.");
         {
             // Act
             // Switch to invariant culture to ensure the error message is in english.
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             // REVIEW: Unsupported on CoreCLR
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 #endif
 
             // Assert
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
     <id>Artem.XmlProviders</id>
@@ -1666,7 +1666,7 @@ Description is required.");
         {
             // Arrange
             // Act & Assert
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
     <id>Artem.XmlProviders</id>
@@ -2164,7 +2164,7 @@ Enabling license acceptance requires a license or a licenseUrl to be specified. 
 </package>";
 
             // Switch to invariant culture to ensure the error message is in english.
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             // REVIEW: Unsupported on CoreCLR
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 #endif
@@ -2223,7 +2223,7 @@ Enabling license acceptance requires a license or a licenseUrl to be specified. 
             ExceptionAssert.ThrowsArgumentException(() => builder.Save(new MemoryStream()), "The package ID 'brainf%2ack' contains invalid characters. Examples of valid package IDs include 'MyPackage' and 'MyPackage.Sample'.");
         }
 
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
         [Fact]
         public void ReadingPackageWithUnknownSchemaThrows()
         {
@@ -2408,13 +2408,13 @@ Enabling license acceptance requires a license or a licenseUrl to be specified. 
 </package>";
 
             // Switch to invariant culture to ensure the error message is in english.
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             // REVIEW: Unsupported on CoreCLR
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 #endif
 
             // Act
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             ExceptionAssert.Throws<InvalidOperationException>(
                 () => new PackageBuilder(spec.AsStream(), null),
                 "The element 'package' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. " +

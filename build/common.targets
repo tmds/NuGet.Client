@@ -1,22 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0">
   <!-- Compiler flags -->
-  <PropertyGroup Condition=" '$(TargetFramework)' == '$(NETFXTargetFramework)' ">
-    <DefineConstants>$(DefineConstants);IS_DESKTOP</DefineConstants>
-    <IsDesktop>true</IsDesktop>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" $(TargetFramework.StartsWith('netcoreapp')) OR $(TargetFramework.StartsWith('netstandard')) ">
-    <DefineConstants>$(DefineConstants);IS_CORECLR</DefineConstants>
-    <IsCore>true</IsCore>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp5.0' ">
-    <DefineConstants>$(DefineConstants);NETCORE5_0</DefineConstants>
+  <PropertyGroup>
+    <IsNETFX Condition=" $(TargetFramework.StartsWith('net4')) ">true</IsNETFX>
+    <IsNETFX Condition=" '$(IsNETFX)' != 'true'">false</IsNETFX>
   </PropertyGroup>
 
   <PropertyGroup>
-    <SigningNotSupported Condition=" '$(TargetFramework)' == 'netstandard2.0' OR '$(TargetFramework)' == 'netcoreapp2.1' OR '$(TargetFramework)' == 'netstandard2.1' OR '$(TargetFramework)' == 'netcoreapp3.1'">true</SigningNotSupported>
+    <SigningNotSupported Condition=" '$(TargetFramework.StartsWith('netstandard')) OR $(TargetFramework.StartsWith('netcoreapp')) ">true</SigningNotSupported>
     <SigningNotSupported Condition=" '$(SigningNotSupported)' != 'true'">false</SigningNotSupported>
   </PropertyGroup>
 
@@ -343,8 +334,7 @@ Condition=" ('%(Extension)' == '.dll' OR '%(Filename)' == 'NuGet.CommandLine.XPl
 
     <ItemGroup>
       <TestAssemblyPath Include="$(AbsoluteTestAssemblyPath)">
-        <IsDesktop Condition=" '$(IsDesktop)' == 'true' ">true</IsDesktop>
-        <IsCore Condition=" '$(IsDesktop)' != 'true' ">true</IsCore>
+        <IsNETFX>$(IsNETFX)</IsNETFX>
       </TestAssemblyPath>
     </ItemGroup>
   </Target>

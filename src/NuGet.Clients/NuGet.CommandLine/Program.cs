@@ -62,7 +62,7 @@ namespace NuGet.CommandLine
             }
 #endif
 
-#if IS_DESKTOP
+#if NETFRAMEWORK
             // Find any response files and resolve the args
             if (!RuntimeEnvironmentHelper.IsMono)
             {

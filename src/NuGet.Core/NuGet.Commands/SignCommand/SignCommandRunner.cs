@@ -170,7 +170,7 @@ namespace NuGet.Commands
 
             if (matchingCertCollection.Count > 1)
             {
-#if IS_DESKTOP
+#if NETFRAMEWORK
                 if (signArgs.NonInteractive || !RuntimeEnvironmentHelper.IsWindows)
                 {
                     // if on non-windows os or in non interactive mode - display the certs and error out

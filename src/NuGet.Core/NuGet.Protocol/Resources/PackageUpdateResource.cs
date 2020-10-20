@@ -498,7 +498,7 @@ namespace NuGet.Protocol.Core.Types
             {
                 case HttpStatusCode.Conflict:
 
-#if IS_DESKTOP
+#if NETFRAMEWORK
                     advertiseDescription = Strings.PushCommandSkipDuplicateAdvertiseNuGetExe;
 #else
                     advertiseDescription = Strings.PushCommandSkipDuplicateAdvertiseDotnetExe;

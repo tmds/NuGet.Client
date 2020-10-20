@@ -19,7 +19,7 @@ namespace NuGet.Credentials
         public PluginUnexpectedStatusException(string message) : base(message) { }
 
         public PluginUnexpectedStatusException(string message, Exception inner) : base(message, inner) { }
-#if IS_DESKTOP
+#if NETFRAMEWORK
         protected PluginUnexpectedStatusException(
           SerializationInfo info,
           StreamingContext context) : base(info, context)

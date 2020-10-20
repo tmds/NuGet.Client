@@ -24,7 +24,7 @@ namespace NuGet.Packaging.Signing
             }
 
             IRfc3161TimestampRequest iRfc3161TimestampRequest = null;
-#if IS_DESKTOP
+#if NETFRAMEWORK
             iRfc3161TimestampRequest = new Rfc3161TimestampRequestNet472Wrapper(
                 messageHash,
                 hashAlgorithm,

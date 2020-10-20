@@ -16,7 +16,6 @@
     <IncludeInVSIX>false</IncludeInVSIX>
     <XPLATProject>false</XPLATProject>
     <UsePublicApiAnalyzer>false</UsePublicApiAnalyzer>
-    <DefineConstants>$(DefineConstants);IS_DESKTOP</DefineConstants>
     <IsDesktop>true</IsDesktop>
     <ILMergeDirectory Condition=" '$(OutputPath)' != '' ">$(OutputPath)$(TargetFramework)\ilmerge\</ILMergeDirectory>
     <ILMergeDirectory Condition=" '$(OutputPath)' == '' ">$(ArtifactsDirectory)$(MSBuildProjectName)\$(BuildVariationFolder)\bin\$(Configuration)\$(TargetFramework)\ilmerge\</ILMergeDirectory>

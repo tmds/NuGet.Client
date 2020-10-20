@@ -83,7 +83,7 @@ namespace NuGet.Common
             }
         }
 
-#if IS_CORECLR
+#if !NETFRAMEWORK
 
         private static string GetFolderPath(SpecialFolder folder)
         {
@@ -212,7 +212,7 @@ namespace NuGet.Common
 
         private static string GetHome()
         {
-#if IS_CORECLR
+#if !NETFRAMEWORK
             if (RuntimeEnvironmentHelper.IsWindows)
             {
                 return GetValueOrThrowMissingEnvVarsDotnet(() => GetDotNetHome() ?? GetHomeWindows(), UserProfile, DotNetHome);

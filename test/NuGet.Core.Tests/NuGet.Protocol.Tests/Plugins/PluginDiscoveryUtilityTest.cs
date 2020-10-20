@@ -12,7 +12,7 @@ namespace NuGet.Protocol.Plugins.Tests
     public class PluginDiscoveryUtilityTest
     {
 
-#if IS_DESKTOP
+#if NETFRAMEWORK
         private static string PluginExtension = ".exe";
 #else
         private static string PluginExtension = ".dll";
@@ -50,7 +50,7 @@ namespace NuGet.Protocol.Plugins.Tests
             var result = PluginDiscoveryUtility.GetNuGetHomePluginsPath();
 
             Assert.Contains(Path.Combine(".nuget", "plugins",
-#if IS_DESKTOP
+#if NETFRAMEWORK
                 "netfx"
 #else
                 "netcore"
@@ -68,7 +68,7 @@ namespace NuGet.Protocol.Plugins.Tests
             Assert.Equal(expected, result);
         }
 
-#if IS_DESKTOP
+#if NETFRAMEWORK
         [Theory]
         [InlineData(@"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\bin",
             @"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\CommonExtensions\Microsoft\NuGet\Plugins")]

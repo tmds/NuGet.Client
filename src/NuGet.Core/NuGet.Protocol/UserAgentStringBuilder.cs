@@ -94,7 +94,7 @@ namespace NuGet.Protocol.Core.Types
         {
             if (_osInfo == null)
             {
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
                 // When not on CoreClr and no OSDescription was provided,
                 // we will set it ourselves.
                 _osInfo = Environment.OSVersion.ToString();

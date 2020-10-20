@@ -373,7 +373,7 @@
 
     <PropertyGroup Condition=" '$(SkipDesktopAssemblies)' != 'true' ">
       <!-- Sort assemblies -->
-      <DesktopInputTestAssemblies>@(TestAssemblyPath->WithMetadataValue("IsDesktop", "true"))</DesktopInputTestAssemblies>
+      <DesktopInputTestAssemblies>@(TestAssemblyPath->WithMetadataValue("IsNETFX", "true"))</DesktopInputTestAssemblies>
       <DesktopInputTestAssembliesSpaced>$(DesktopInputTestAssemblies.Replace(';', ' '))</DesktopInputTestAssembliesSpaced>
       
       <!-- Build exe commands -->
@@ -382,7 +382,7 @@
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(SkipCoreAssemblies)' != 'true' ">
-      <CoreInputTestAssemblies>@(TestAssemblyPath->WithMetadataValue("IsCore", "true"))</CoreInputTestAssemblies>
+      <CoreInputTestAssemblies>@(TestAssemblyPath->WithMetadataValue("IsNETFX", "false"))</CoreInputTestAssemblies>
       <CoreInputTestAssembliesSpaced>$(CoreInputTestAssemblies.Replace(';', ' '))</CoreInputTestAssembliesSpaced>
 
       <VsTestLogger>--TestAdapterPath:$(XunitXmlLoggerDirectory) --logger:"xunit;LogFileName=$(TestResultsFileName)-vsts.$(TestResultOutputFormat)" --logger:"console;verbosity=detailed" --settings:$(MSBuildThisFileDirectory)xunit.runsettings</VsTestLogger>

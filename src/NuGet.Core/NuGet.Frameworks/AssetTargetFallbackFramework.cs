@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NuGet.Shared;
 
-#if IS_NET40_CLIENT
+#if NET40
 using FallbackList = System.Collections.Generic.IList<NuGet.Frameworks.NuGetFramework>;
 #else
 using FallbackList = System.Collections.Generic.IReadOnlyList<NuGet.Frameworks.NuGetFramework>;

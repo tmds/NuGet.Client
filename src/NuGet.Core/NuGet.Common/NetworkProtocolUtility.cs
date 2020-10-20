@@ -12,7 +12,7 @@ namespace NuGet.Common
         /// </summary>
         public static void SetConnectionLimit()
         {
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             // Increase the maximum number of connections per server.
             if (!RuntimeEnvironmentHelper.IsMono)
             {

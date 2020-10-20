@@ -40,7 +40,7 @@ namespace NuGet.Protocol.FuncTest
         {
             logger.WriteLine($"Plugin file path:  {PluginFile.FullName}");
         }
-#if IS_DESKTOP
+#if NETFRAMEWORK
         [PlatformFact(Platform.Windows)]
         public async Task GetOrCreateAsync_SuccessfullyHandshakes()
         {
@@ -346,7 +346,7 @@ namespace NuGet.Protocol.FuncTest
                 Console.SetOut(_original);
             }
 
-#if IS_DESKTOP
+#if NETFRAMEWORK
             public override void Close()
             {
                 _original.Close();

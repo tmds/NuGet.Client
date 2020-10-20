@@ -246,7 +246,7 @@ namespace NuGet.Packaging.Signing
         /// </summary>
         internal static void EnsureValidNonce(byte[] nonce)
         {
-#if IS_DESKTOP
+#if NETFRAMEWORK
             // Eventually, CryptEncodeObjectEx(...) is called on a CRYPT_TIMESTAMP_REQUEST with this nonce,
             // and CryptEncodeObjectEx(...) interprets the nonce as a little endian, DER-encoded integer value
             // (without tag and length), and may even strip leading bytes from the big endian representation

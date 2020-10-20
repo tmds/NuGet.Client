@@ -56,11 +56,11 @@ namespace NuGet.Build.Tasks.Test
                 })
                 {
                     task.GetCommandLineArguments().ToList().Should().BeEquivalentTo(
-#if IS_CORECLR
+#if !NETFRAMEWORK
                     Path.ChangeExtension(typeof(RestoreTaskEx).Assembly.Location, ".Console.dll"),
 #endif
                     "CleanupAssetsForUnsupportedProjects=True;DisableParallel=True;Force=True;ForceEvaluate=True;HideWarningsAndErrors=True;IgnoreFailedSources=True;Interactive=True;NoCache=True;Recursive=True;RestorePackagesConfig=True",
-#if IS_CORECLR
+#if !NETFRAMEWORK
                     Path.Combine(msbuildBinPath, "MSBuild.dll"),
 #else
                     Path.Combine(msbuildBinPath, "MSBuild.exe"),
@@ -83,7 +83,7 @@ namespace NuGet.Build.Tasks.Test
                     MSBuildBinPath = msbuildBinPath
                 })
                 {
-#if IS_CORECLR
+#if !NETFRAMEWORK
                     task.GetProcessFileName(null).Should().Be(Path.Combine(testDirectory, "MSBuild", "dotnet"));
 #else
                     task.GetProcessFileName(null).Should().Be(Path.ChangeExtension(typeof(RestoreTaskEx).Assembly.Location, ".Console.exe"));

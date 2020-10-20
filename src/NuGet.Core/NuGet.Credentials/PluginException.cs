@@ -17,7 +17,7 @@ namespace NuGet.Credentials
         public PluginException(string message) : base(message) { }
 
         public PluginException(string message, Exception inner) : base(message, inner) { }
-#if IS_DESKTOP
+#if NETFRAMEWORK
         protected PluginException(
           System.Runtime.Serialization.SerializationInfo info,
           System.Runtime.Serialization.StreamingContext context) : base(info, context)

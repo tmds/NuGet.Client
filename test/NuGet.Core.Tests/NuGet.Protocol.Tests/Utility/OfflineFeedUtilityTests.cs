@@ -20,7 +20,7 @@ namespace NuGet.Protocol.Tests
     // Negative tests here won't run well on *nix because bad test data used will trigger new exceptions
     // TODO: we can revisit to catch them if there is value.
 
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
     public class OfflineFeedUtilityTests
     {
         [Theory]

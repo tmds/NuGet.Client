@@ -444,7 +444,7 @@ namespace NuGet.Packaging.Test
   </metadata>
 </package>";
             // Act & Assert
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             var exception = Assert.Throws<InvalidOperationException>(
                 () => Manifest.ReadFrom(content.AsStream(), validateSchema: true));
             Assert.Equal(
@@ -505,13 +505,13 @@ namespace NuGet.Packaging.Test
         public void ReadFromThrowIfValidateSchemaIsTrue()
         {
             // Switch to invariant culture to ensure the error message is in english.
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             // REVIEW: Unsupported on CoreCLR
             System.Threading.Thread.CurrentThread.CurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
 #endif
 
             // Act && Assert
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             // Arrange
             string content = @"<?xml version=""1.0""?>
 <package xmlns=""http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd"">
@@ -552,13 +552,13 @@ namespace NuGet.Packaging.Test
 </package>";
 
             // Switch to invariant culture to ensure the error message is in english.
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             // REVIEW: Unsupported on CoreCLR
             System.Threading.Thread.CurrentThread.CurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
 #endif
 
             // Act && Assert
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             ExceptionAssert.Throws<InvalidOperationException>(
                 () => Manifest.ReadFrom(content.AsStream(), validateSchema: true),
                 "The element 'group' in namespace 'http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd' has incomplete content. " +
@@ -591,7 +591,7 @@ namespace NuGet.Packaging.Test
 </package>";
 
             // Switch to invariant culture to ensure the error message is in english.
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             // REVIEW: Unsupported on CoreCLR
             System.Threading.Thread.CurrentThread.CurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
 #endif

@@ -57,7 +57,7 @@ namespace NuGet.Core.FuncTest
             await VerifyFailureOnReadAsync(ReadStreamAsync);
         }
 
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
         [Fact]
         public async Task DownloadTimeoutStream_ApmNotSupported()
         {
@@ -177,7 +177,7 @@ namespace NuGet.Core.FuncTest
             return Encoding.ASCII.GetString(destination.ToArray());
         }
 
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
         private async Task<string> ReadStreamApm(Stream stream)
         {
             var destination = new MemoryStream();

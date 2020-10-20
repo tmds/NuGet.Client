@@ -115,7 +115,7 @@ namespace NuGet.Common.Test
             {
                 Assert.True(hashAlgorithm is SHA256);
 
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
                 if (AllowOnlyFipsAlgorithms())
                 {
                     Assert.IsType<SHA256CryptoServiceProvider>(hashAlgorithm);
@@ -130,7 +130,7 @@ namespace NuGet.Common.Test
 
         private static bool AllowOnlyFipsAlgorithms()
         {
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             // Mono does not currently support this method. Have this in a separate method to avoid JITing exceptions.
             var cryptoConfig = typeof(CryptoConfig);
 

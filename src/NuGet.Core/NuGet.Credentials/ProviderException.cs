@@ -20,7 +20,7 @@ namespace NuGet.Credentials
         public ProviderException(string message, Exception inner) : base(message, inner)
         {
         }
-#if IS_DESKTOP
+#if NETFRAMEWORK
         protected ProviderException(
             SerializationInfo info,
             StreamingContext context) : base(info, context)

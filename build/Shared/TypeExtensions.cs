@@ -1,4 +1,4 @@
-#if IS_NET40_CLIENT
+#if NET40
 using NuGet.Shared;
 
 namespace System.Reflection

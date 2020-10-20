@@ -596,7 +596,7 @@ namespace Test.Utility.Signing
                 first.RepositoryCountersignatureVerificationBehavior == second.RepositoryCountersignatureVerificationBehavior;
         }
 
-#if IS_DESKTOP
+#if NETFRAMEWORK
         public static DisposableList<IDisposable> RegisterDefaultResponders(
             this ISigningTestServer testServer,
             TimestampService timestampService)

@@ -10,7 +10,7 @@ namespace NuGet.Configuration
 {
     public class ProxyCache : IProxyCache, IProxyCredentialCache
     {
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
         /// <summary>
         /// Capture the default System Proxy so that it can be re-used by the IProxyFinder
         /// because we can't rely on WebRequest.DefaultWebProxy since someone can modify the DefaultWebProxy
@@ -57,7 +57,7 @@ namespace NuGet.Configuration
                 return configuredProxy;
             }
 
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             if (IsSystemProxySet(sourceUri))
             {
                 var systemProxy = GetSystemProxy(sourceUri);
@@ -171,7 +171,7 @@ namespace NuGet.Configuration
             }
         }
 
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
         private static WebProxy GetSystemProxy(Uri uri)
         {
             // WebRequest.DefaultWebProxy seems to be more capable in terms of getting the default

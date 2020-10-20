@@ -15,7 +15,7 @@ namespace NuGet.Packaging
     {
         private byte[] _hash;
 
-#if IS_DESKTOP
+#if NETFRAMEWORK
         private readonly SHA512 _hashFunc;
 
         public Sha512HashFunction()
@@ -44,7 +44,7 @@ namespace NuGet.Packaging
             return _hash;
         }
 
-#elif IS_CORECLR
+#elif !NETFRAMEWORK
         private readonly IncrementalHash _hashFunc;
 
         public Sha512HashFunction()

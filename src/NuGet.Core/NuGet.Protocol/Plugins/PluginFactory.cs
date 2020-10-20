@@ -152,7 +152,7 @@ namespace NuGet.Protocol.Plugins
             CancellationToken sessionCancellationToken)
         {
             var args = string.Join(" ", arguments);
-#if IS_DESKTOP
+#if NETFRAMEWORK
             var startInfo = new ProcessStartInfo(filePath)
             {
                 Arguments = args,

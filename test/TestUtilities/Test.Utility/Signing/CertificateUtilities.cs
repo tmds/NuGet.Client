@@ -45,7 +45,7 @@ namespace Test.Utility.Signing
             Assert.IsType<RsaPrivateCrtKeyParameters>(keyPair.Private);
 
             var privateKeyParameters = (RsaPrivateCrtKeyParameters)keyPair.Private;
-#if IS_DESKTOP
+#if NETFRAMEWORK
             RSA privateKey = DotNetUtilities.ToRSA(privateKeyParameters);
 
             var certificate = new X509Certificate2(bcCertificate.GetEncoded());

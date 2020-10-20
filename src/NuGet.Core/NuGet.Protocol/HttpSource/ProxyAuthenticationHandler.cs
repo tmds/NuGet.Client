@@ -109,7 +109,7 @@ namespace NuGet.Protocol
             }
         }
 
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
         // Returns true if the cause of the exception is proxy authentication failure
         private static bool ProxyAuthenticationRequired(Exception ex)
         {

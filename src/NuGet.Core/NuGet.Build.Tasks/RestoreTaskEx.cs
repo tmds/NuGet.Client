@@ -190,7 +190,7 @@ namespace NuGet.Build.Tasks
         /// <returns>An <see cref="IEnumerable{String}" /> containing the command-line arguments that need to separated by spaces and surrounded by quotes.</returns>
         internal IEnumerable<string> GetCommandLineArguments()
         {
-#if IS_CORECLR
+#if !NETFRAMEWORK
             // The full path to the executable for dotnet core
             yield return Path.Combine(ThisAssemblyLazy.Value.DirectoryName, Path.ChangeExtension(ThisAssemblyLazy.Value.Name, ".Console.dll"));
 #endif
@@ -213,7 +213,7 @@ namespace NuGet.Build.Tasks
             yield return string.Join(";", options.Where(i => i.Value).Select(i => $"{i.Key}={i.Value}"));
 
             // Full path to MSBuild.exe or MSBuild.dll
-#if IS_CORECLR
+#if !NETFRAMEWORK
             yield return Path.Combine(MSBuildBinPath, "MSBuild.dll");
 #else
             yield return Path.Combine(MSBuildBinPath, "MSBuild.exe");
@@ -239,7 +239,7 @@ namespace NuGet.Build.Tasks
             {
                 return Path.GetFullPath(processFileName);
             }
-#if IS_CORECLR
+#if !NETFRAMEWORK
             // In .NET Core, the path to dotnet is the file to run
             return Path.GetFullPath(Path.Combine(MSBuildBinPath, "..", "..", "dotnet"));
 #else
@@ -249,7 +249,7 @@ namespace NuGet.Build.Tasks
 
         private Dictionary<string, string> GetGlobalProperties()
         {
-#if IS_CORECLR
+#if !NETFRAMEWORK
             // MSBuild 16.5 and above has a method to get the global properties, older versions do not
             Dictionary<string, string> msBuildGlobalProperties = BuildEngine is IBuildEngine6 buildEngine6
                 ? buildEngine6.GetGlobalProperties().ToDictionary(i => i.Key, i => i.Value, StringComparer.OrdinalIgnoreCase)

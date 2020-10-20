@@ -470,7 +470,7 @@ namespace NuGet.Protocol.Tests
             }
         }
 
-#if IS_DESKTOP
+#if NETFRAMEWORK
         // TODO: To work on coreclr we need to address https://github.com/NuGet/Home/issues/7588
 
         [Fact]

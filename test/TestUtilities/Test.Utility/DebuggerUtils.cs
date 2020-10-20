@@ -10,7 +10,7 @@ namespace Test.Utility
     {
         public static void WaitForDebugger()
         {
-#if IS_CORECLR
+#if !NETFRAMEWORK
             Console.WriteLine("Waiting for debugger to attach.");
             Console.WriteLine($"Process ID: {Process.GetCurrentProcess().Id}");
 

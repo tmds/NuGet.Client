@@ -35,7 +35,7 @@ namespace NuGet.Test.Utility
                 RedirectStandardInput = inputAction != null
             };
 
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             psi.EnvironmentVariables["NuGetTestModeEnabled"] = "True";
 #else
             psi.Environment["NuGetTestModeEnabled"] = "True";
@@ -45,7 +45,7 @@ namespace NuGet.Test.Utility
             {
                 foreach (var pair in environmentVariables)
                 {
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
                     psi.EnvironmentVariables[pair.Key] = pair.Value;
 #else
                     psi.Environment[pair.Key] = pair.Value;

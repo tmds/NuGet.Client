@@ -14,7 +14,7 @@ namespace NuGet.Protocol.Plugins
 
         private static string NuGetPluginsDirectory = "Plugins";
 
-#if IS_DESKTOP
+#if NETFRAMEWORK
         /// <summary>
         /// The internal plugins located next to the NuGet assemblies.
         /// </summary>
@@ -64,7 +64,7 @@ namespace NuGet.Protocol.Plugins
 
             return Path.Combine(nuGetHome,
                 "plugins",
-#if IS_DESKTOP
+#if NETFRAMEWORK
                 "netfx"
 #else
                 "netcore"
@@ -82,7 +82,7 @@ namespace NuGet.Protocol.Plugins
 
                 foreach (var pluginDirectory in pluginDirectories)
                 {
-#if IS_DESKTOP
+#if NETFRAMEWORK
                     var expectedPluginName = Path.Combine(pluginDirectory, Path.GetFileName(pluginDirectory) + ".exe");
 #else
                     var expectedPluginName = Path.Combine(pluginDirectory, Path.GetFileName(pluginDirectory) + ".dll");

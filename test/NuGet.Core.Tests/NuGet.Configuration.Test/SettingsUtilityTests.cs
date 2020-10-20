@@ -16,7 +16,7 @@ namespace NuGet.Configuration.Test
         public void GetGlobalPackagesFolder_Default()
         {
             // Arrange
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 #else
             string userProfile = null;
@@ -90,7 +90,7 @@ namespace NuGet.Configuration.Test
             }
         }
 
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
         [Fact]
         public void SetEncryptedValueForAddItem_UpdatesExistingItemValueWithEncryptedOne()
         {

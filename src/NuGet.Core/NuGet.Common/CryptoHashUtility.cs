@@ -159,7 +159,7 @@ namespace NuGet.Common
 
         public static HashAlgorithm GetHashProvider(this HashAlgorithmName hashAlgorithmName)
         {
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             if (AllowFipsAlgorithmsOnly.Value)
             {
                 // FIPs
@@ -214,7 +214,7 @@ namespace NuGet.Common
         /// </remarks>
         private static bool ReadFipsConfigValue()
         {
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
             // Mono does not currently support this method. Have this in a separate method to avoid JITing exceptions.
             var cryptoConfig = typeof(CryptoConfig);
 

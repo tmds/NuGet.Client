@@ -187,7 +187,7 @@ namespace NuGet.Credentials
             {
                 FileName = Path,
                 Arguments = argumentString,
-#if IS_DESKTOP                
+#if NETFRAMEWORK
                 WindowStyle = ProcessWindowStyle.Hidden,
                 ErrorDialog = false,
 #endif

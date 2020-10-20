@@ -136,7 +136,7 @@ namespace NuGet.Packaging.Signing
 
             try
             {
-#if IS_DESKTOP
+#if NETFRAMEWORK
                 cms.ComputeSignature(cmsSigner);
 #else
                 // In .NET Framework, this parameter is not used and a PIN prompt is always shown. In .NET Core, the silent flag needs to be set to false to show a PIN prompt.

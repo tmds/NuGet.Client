@@ -312,7 +312,7 @@ namespace NuGet.Protocol.Plugins
             {
                 throw new ArgumentNullException(nameof(pluginFactoryCreator));
             }
-#if IS_DESKTOP
+#if NETFRAMEWORK
             _rawPluginPaths = reader.GetEnvironmentVariable(EnvironmentVariableConstants.DesktopPluginPaths);
 #else
             _rawPluginPaths = reader.GetEnvironmentVariable(EnvironmentVariableConstants.CorePluginPaths);

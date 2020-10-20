@@ -17,7 +17,7 @@ namespace NuGet.Packaging.Signing
             }
 #if IS_SIGNING_SUPPORTED
             ICms cms = null;
-#if IS_DESKTOP
+#if NETFRAMEWORK
             NativeCms nativeCms = NativeCms.Decode(cmsBytes);
             cms = new NativeCmsWrapper(nativeCms);
 #else

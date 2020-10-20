@@ -10,7 +10,7 @@
     <Description>Integration tests for the more involved NuGet.Packaging functionality, such as signing.</Description>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == '$(NETFXTargetFramework)' ">
+  <ItemGroup Condition=" '$(IsNETFX)' == 'true' ">
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Security" />

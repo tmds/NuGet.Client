@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-#if IS_CORECLR
+#if !NETFRAMEWORK
 using System.Runtime.InteropServices;
 #endif
 using System.Threading;
@@ -19,7 +19,7 @@ using NuGet.ProjectModel;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 
-#if IS_DESKTOP
+#if NETFRAMEWORK
 using System.Collections.Concurrent;
 using System.Xml;
 using System.Xml.Linq;
@@ -183,7 +183,7 @@ namespace NuGet.Build.Tasks
                 NetworkProtocolUtility.SetConnectionLimit();
 
                 // Set user agent string used for network calls
-#if IS_CORECLR
+#if !NETFRAMEWORK
                 UserAgent.SetUserAgentString(new UserAgentStringBuilder("NuGet .NET Core MSBuild Task")
                     .WithOSDescription(RuntimeInformation.OSDescription));
 #else
@@ -194,7 +194,7 @@ namespace NuGet.Build.Tasks
                 var restoreSummaries = new List<RestoreSummary>();
                 var providerCache = new RestoreCommandProvidersCache();
 
-#if IS_DESKTOP
+#if NETFRAMEWORK
                 if (restorePC && dependencyGraphSpec.Projects.Any(i => i.RestoreMetadata.ProjectStyle == ProjectStyle.PackagesConfig))
                 {
                     var v2RestoreResult = await PerformNuGetV2RestoreAsync(log, dependencyGraphSpec, noCache, disableParallel, interactive);
@@ -440,7 +440,7 @@ namespace NuGet.Build.Tasks
             return false;
         }
 
-#if IS_DESKTOP
+#if NETFRAMEWORK
         private static async Task<RestoreSummary> PerformNuGetV2RestoreAsync(Common.ILogger log, DependencyGraphSpec dgFile, bool noCache, bool disableParallel, bool interactive)
         {
             string globalPackageFolder = null;

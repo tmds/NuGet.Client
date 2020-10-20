@@ -92,7 +92,7 @@ namespace NuGet.Core.FuncTest
 
             // Act & Assert
             var exception = await ThrowsException<HttpRequestException>(server);
-#if IS_CORECLR
+#if !NETFRAMEWORK
             Assert.NotNull(exception.InnerException);
             if (!RuntimeEnvironmentHelper.IsWindows)
             {
@@ -100,7 +100,7 @@ namespace NuGet.Core.FuncTest
             }
             else
             {
-#if (NETCORE3_0 || NETCORE5_0)
+#IF NET5_0
                 Assert.Equal("No connection could be made because the target machine actively refused it.", exception.InnerException.Message);
 #else
                 Assert.Equal("No connection could be made because the target machine actively refused it", exception.InnerException.Message);
@@ -120,9 +120,9 @@ namespace NuGet.Core.FuncTest
 
             // Act & Assert
             var exception = await ThrowsException<HttpRequestException>(server);
-#if IS_CORECLR
+#if !NETFRAMEWORK
             Assert.Null(exception.InnerException);
-#if (NETCORE3_0 || NETCORE5_0)
+#IF NET5_0
             Assert.Equal("Received an invalid status code: 'BAD'.", exception.Message);
 #else
             Assert.Equal("The server returned an invalid or unrecognized response.", exception.Message);
@@ -141,12 +141,12 @@ namespace NuGet.Core.FuncTest
 
             // Act & Assert
             var exception = await ThrowsException<HttpRequestException>(server);
-#if IS_CORECLR
+#if !NETFRAMEWORK
             Assert.NotNull(exception.InnerException);
 
             if (RuntimeEnvironmentHelper.IsMacOSX)
             {
-#if (NETCORE3_0 || NETCORE5_0)
+#IF NET5_0
                 Assert.Equal("nodename nor servname provided, or not known", exception.InnerException.Message);
 #else
                 Assert.Equal("Device not configured", exception.InnerException.Message);
@@ -154,7 +154,7 @@ namespace NuGet.Core.FuncTest
             }
             else if (!RuntimeEnvironmentHelper.IsWindows)
             {
-#if (NETCORE3_0 || NETCORE5_0)
+#IF NET5_0
                 Assert.Equal("Name or service not known", exception.InnerException.Message);
 #else
                 Assert.Equal("No such device or address", exception.InnerException.Message);
@@ -162,7 +162,7 @@ namespace NuGet.Core.FuncTest
             }
             else
             {
-#if (NETCORE3_0 || NETCORE5_0)
+#IF NET5_0
                 Assert.Equal("No such host is known.", exception.InnerException.Message);
 #else
                 Assert.Equal("No such host is known", exception.InnerException.Message);

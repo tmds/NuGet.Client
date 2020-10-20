@@ -46,7 +46,7 @@ namespace NuGet.Common
 
         private static bool GetIsWindows()
         {
-#if IS_CORECLR
+#if !NETFRAMEWORK
             // This API does work on full framework but it requires a newer nuget client (RID aware)
             if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
             {
@@ -97,7 +97,7 @@ namespace NuGet.Common
 
         private static bool GetIsMacOSX()
         {
-#if IS_CORECLR
+#if !NETFRAMEWORK
             // This API does work on full framework but it requires a newer nuget client (RID aware)
             if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX))
             {
@@ -145,7 +145,7 @@ namespace NuGet.Common
 
         private static bool GetIsLinux()
         {
-#if IS_CORECLR
+#if !NETFRAMEWORK
             // This API does work on full framework but it requires a newer nuget client (RID aware)
             if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux))
             {

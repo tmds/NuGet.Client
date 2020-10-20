@@ -14,7 +14,7 @@ namespace NuGet.Packaging.Test.SigningTests
         {
             get
             {
-#if IS_DESKTOP
+#if NETFRAMEWORK
                 yield return new object[] { new byte[] { 0xff, 0x00 }, new byte[] { 0xff, 0x01 } };
                 yield return new object[] { new byte[] { 0xff, 0x01 }, new byte[] { 0xff, 0x01 } };
                 yield return new object[] { new byte[] { 0xff, 0x7f }, new byte[] { 0xff, 0x7f } };

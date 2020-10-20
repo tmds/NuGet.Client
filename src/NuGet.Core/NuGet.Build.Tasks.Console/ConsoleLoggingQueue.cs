@@ -1,16 +1,16 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
-#if IS_DESKTOP
+#if NETFRAMEWORK
 extern alias MicrosoftBuildUtilitiesv4;
 #endif
 
 using System;
 using System.Collections;
 using Microsoft.Build.Framework;
-#if IS_CORECLR
+#if !NETFRAMEWORK
 using Microsoft.Build.Utilities;
 #endif
-#if IS_DESKTOP
+#if NETFRAMEWORK
 using TaskLoggingHelper = MicrosoftBuildUtilitiesv4::Microsoft.Build.Utilities.TaskLoggingHelper;
 #endif
 

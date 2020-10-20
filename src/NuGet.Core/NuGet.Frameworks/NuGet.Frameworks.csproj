@@ -21,10 +21,6 @@
     <TargetFramework>$(NETFXTargetFramework)</TargetFramework>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net40' ">
-    <DefineConstants>$(DefineConstants);IS_DESKTOP;IS_NET40_CLIENT</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup>
     <Compile Update="Strings.Designer.cs">
       <DesignTime>True</DesignTime>

@@ -140,7 +140,7 @@ namespace NuGet.Protocol.Plugins.Tests
             mockReader.Setup(x => x.GetEnvironmentVariable(
                     It.Is<string>(value => value == EnvironmentVariableConstants.PluginPaths)))
                 .Returns("badPluginPath");
-#if IS_DESKTOP
+#if NETFRAMEWORK
             mockReader.Setup(x => x.GetEnvironmentVariable(
                     It.Is<string>(value => value == EnvironmentVariableConstants.DesktopPluginPaths)))
                 .Returns(pluginPath);

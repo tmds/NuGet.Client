@@ -58,7 +58,7 @@ namespace NuGet.Commands
 
                     if (isPackagePathProvided)
                     {
-#if IS_DESKTOP
+#if NETFRAMEWORK
                         if (isServiceIndexProvided || isFingerprintProvided || isAlgorithmProvided)
                         {
                             throw new CommandLineArgumentCombinationException(string.Format(CultureInfo.CurrentCulture, Strings.Error_CouldNotAdd, Strings.Error_InvalidCombinationOfArguments));

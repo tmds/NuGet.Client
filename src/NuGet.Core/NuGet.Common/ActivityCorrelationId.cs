@@ -3,7 +3,7 @@
 
 using System;
 
-#if IS_CORECLR
+#if !NETFRAMEWORK
 using System.Threading;
 #else
 using System.Runtime.Remoting.Messaging;
@@ -18,7 +18,7 @@ namespace NuGet.Common
     /// </summary>
     public static class ActivityCorrelationId
     {
-#if IS_CORECLR
+#if !NETFRAMEWORK
         private static readonly AsyncLocal<string> _correlationId = new AsyncLocal<string>();
 #else
         private static readonly string CorrelationIdSlot = "NuGet.Common.ActivityCorrelationId";
@@ -33,7 +33,7 @@ namespace NuGet.Common
         {
             get
             {
-#if IS_CORECLR
+#if !NETFRAMEWORK
                 var correlationId = _correlationId.Value;
 #else
                 var correlationId = CallContext.LogicalGetData(CorrelationIdSlot) as string;
@@ -50,7 +50,7 @@ namespace NuGet.Common
         {
             var correlationId = Guid.NewGuid().ToString();
 
-#if IS_CORECLR
+#if !NETFRAMEWORK
             _correlationId.Value = correlationId;
 #else
             CallContext.LogicalSetData(CorrelationIdSlot, correlationId);
@@ -59,7 +59,7 @@ namespace NuGet.Common
 
         public static void Clear()
         {
-#if IS_CORECLR
+#if !NETFRAMEWORK
             _correlationId.Value = null;
 #else
             CallContext.FreeNamedDataSlot(CorrelationIdSlot);

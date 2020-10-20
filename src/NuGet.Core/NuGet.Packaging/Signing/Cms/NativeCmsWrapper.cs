@@ -8,7 +8,7 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace NuGet.Packaging.Signing
 {
-#if IS_SIGNING_SUPPORTED && IS_DESKTOP
+#if IS_SIGNING_SUPPORTED && NETFRAMEWORK
     internal sealed class NativeCmsWrapper : ICms
     {
         private readonly NativeCms _nativeCms;

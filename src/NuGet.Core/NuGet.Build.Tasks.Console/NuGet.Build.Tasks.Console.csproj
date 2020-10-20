@@ -30,12 +30,12 @@
     <PackageReference Include="Microsoft.Build.Utilities.Core" ExcludeAssets="Runtime" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == '$(NETFXTargetFramework)' ">
+  <ItemGroup Condition=" '$(IsNETFX)' == 'true' ">
     <Reference Include="Microsoft.Build.Utilities.v4.0" Aliases="MicrosoftBuildUtilitiesv4" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="App.config" Condition=" '$(TargetFramework)' == '$(NETFXTargetFramework)' " />
+    <None Include="App.config" Condition=" '$(IsNETFX)' == 'true' " />
   </ItemGroup>
 
   <ItemGroup>
@@ -61,7 +61,7 @@
   <Target Name="PackBuildOutputs">
     <ItemGroup>
       <TfmSpecificPackageFile Include="$(TargetPath)" PackagePath="contentFiles\any\$(TargetFramework)" PackageCopyToOutput="true" />
-      <TfmSpecificPackageFile Include="$(ProjectRuntimeConfigFilePath)" Condition=" '$(IsCore)' == 'true' " PackagePath="contentFiles\any\$(TargetFramework)" PackageCopyToOutput="true" />
+      <TfmSpecificPackageFile Include="$(ProjectRuntimeConfigFilePath)" Condition=" '$(IsNETFX)' == 'false' " PackagePath="contentFiles\any\$(TargetFramework)" PackageCopyToOutput="true" />
     </ItemGroup>
   </Target>
 

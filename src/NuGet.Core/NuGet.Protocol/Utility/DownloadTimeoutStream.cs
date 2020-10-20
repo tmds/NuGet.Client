@@ -45,7 +45,7 @@ namespace NuGet.Protocol
             return _networkStream.Read(buffer, offset, count);
         }
 
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
         public override IAsyncResult BeginRead(
             byte[] buffer,
             int offset,

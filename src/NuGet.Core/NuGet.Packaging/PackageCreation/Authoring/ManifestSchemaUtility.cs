@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Linq;
 using NuGet.Packaging.PackageCreation.Resources;
 
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
 using System.Collections.Concurrent;
 using System.IO;
 using System.Xml;
@@ -58,7 +58,7 @@ namespace NuGet.Packaging
             SchemaVersionV6
         };
 
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
         private static ConcurrentDictionary<string, XmlSchemaSet> _manifestSchemaSetCache = new ConcurrentDictionary<string, XmlSchemaSet>(StringComparer.OrdinalIgnoreCase);
 #endif
 
@@ -80,7 +80,7 @@ namespace NuGet.Packaging
             return VersionToSchemaMappings[version - 1];
         }
 
-#if !IS_CORECLR
+#if !!NETFRAMEWORK
         public static XmlSchemaSet GetManifestSchemaSet(string schemaNamespace)
         {
             return _manifestSchemaSetCache.GetOrAdd(schemaNamespace, schema =>

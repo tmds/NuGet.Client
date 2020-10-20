@@ -35,12 +35,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <ItemGroup Condition=" '$(IsCore)' == 'true' ">
+  <ItemGroup Condition=" '$(IsNETFX)' == 'false' ">
     <PackageReference Include="Microsoft.Net.Compilers.netcore" />
   </ItemGroup>
   <Target Name="CopyTargets" AfterTargets="AfterBuild">
-    <Copy Condition=" '$(IsCore)' == 'true' " SourceFiles="$(MSBuildProjectDirectory)\$(OutputPath)\Microsoft.CSharp.Core.targets" DestinationFolder="$(MSBuildProjectDirectory)\$(OutputPath)\Roslyn\" />
-    <Copy Condition="'$(TargetFramework)' == '$(NETFXTargetFramework)'" SourceFiles="$(MSBuildProjectDirectory)\$(OutputPath)\Microsoft.CSharp.Core.targets" DestinationFolder="$(MSBuildProjectDirectory)\$(OutputPath)\..\..\$(VisualStudioVersion)\Bin\Roslyn\" />
+    <Copy Condition=" '$(IsNETFX)' == 'false' " SourceFiles="$(MSBuildProjectDirectory)\$(OutputPath)\Microsoft.CSharp.Core.targets" DestinationFolder="$(MSBuildProjectDirectory)\$(OutputPath)\Roslyn\" />
+    <Copy Condition=" '$(IsNETFX)' == 'true' " SourceFiles="$(MSBuildProjectDirectory)\$(OutputPath)\Microsoft.CSharp.Core.targets" DestinationFolder="$(MSBuildProjectDirectory)\$(OutputPath)\..\..\$(VisualStudioVersion)\Bin\Roslyn\" />
   </Target>
   
   <Import Project="$(BuildCommonDirectory)common.targets" />

@@ -22,7 +22,7 @@ namespace NuGet.CommandLine
             _console = console ?? throw new ArgumentNullException(nameof(console));
         }
 
-#if IS_DESKTOP
+#if NETFRAMEWORK
         /// <summary>
         /// Requests user to input password and returns it as a SecureString on Console.
         /// </summary>

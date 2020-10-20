@@ -20,7 +20,7 @@
     <PackageReference Include="Microsoft.Web.Xdt" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == '$(NETFXTargetFramework)' ">
+  <ItemGroup Condition=" '$(IsNETFX)' == 'true' ">
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="Microsoft.Build" />
     <Reference Include="System.IO.Compression" />

@@ -2100,7 +2100,7 @@ namespace NuGet.Configuration.Test
         public void NuGetEnviromentPath_OnWindows_ReturnsCorrectPath()
         {
             // Arrange
-#if IS_CORECLR
+#if !NETFRAMEWORK
             var programFilesX86Data = Environment.GetEnvironmentVariable("PROGRAMFILES(X86)");
 
             if (string.IsNullOrEmpty(programFilesX86Data))
@@ -2135,7 +2135,7 @@ namespace NuGet.Configuration.Test
         public void NuGetEnviromentPath_OnMac_ReturnsCorrectPath()
         {
             // Arrange
-#if IS_CORECLR
+#if !NETFRAMEWORK
             var commonApplicationData = @"/Library/Application Support";
             var userSetting = Path.Combine(Environment.GetEnvironmentVariable("HOME"), ".nuget");
 #else
@@ -2160,7 +2160,7 @@ namespace NuGet.Configuration.Test
         public void NuGetEnviromentPath_OnLinux_ReturnsCorrectPath()
         {
             // Arrange
-#if IS_CORECLR
+#if !NETFRAMEWORK
             var commonApplicationData = @"/etc/opt";
             var userSetting = Path.Combine(Environment.GetEnvironmentVariable("HOME"), ".nuget");
 #else
@@ -2337,7 +2337,7 @@ namespace NuGet.Configuration.Test
             Assert.Equal(path, resolvedPath);
         }
 
-#if IS_DESKTOP
+#if NETFRAMEWORK
         // The .NET Core implementation of System.IO.Path.GetPathRoot(...) never throws.
         [Fact]
         public void ResolvePathFromOrigin_WhenPathIsInvalidRelativeFileSystemPath_Throws()

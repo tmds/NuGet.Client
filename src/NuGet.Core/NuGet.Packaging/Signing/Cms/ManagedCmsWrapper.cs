@@ -9,7 +9,7 @@ using NuGet.Common;
 
 namespace NuGet.Packaging.Signing
 {
-#if IS_SIGNING_SUPPORTED && IS_CORECLR
+#if IS_SIGNING_SUPPORTED && !NETFRAMEWORK
     internal sealed class ManagedCmsWrapper : ICms
     {
         private readonly SignedCms _signedCms;

@@ -33,7 +33,7 @@ namespace NuGet.Commands
         private const int MACOS_INVALID_CERT = -25257;
 
 
-#if IS_SIGNING_SUPPORTED && IS_CORECLR
+#if IS_SIGNING_SUPPORTED && !NETFRAMEWORK
         //Generic exception ASN1 corrupted data
         private const int OPENSSL_ASN1_CORRUPTED_DATA_ERROR = unchecked((int)0x80131501);
 #else
@@ -83,7 +83,7 @@ namespace NuGet.Commands
                                     options.CertificatePath)));
 
                         case CRYPT_E_NO_MATCH_HRESULT:
-#if IS_SIGNING_SUPPORTED && IS_CORECLR
+#if IS_SIGNING_SUPPORTED && !NETFRAMEWORK
                         case OPENSSL_ASN1_CORRUPTED_DATA_ERROR:
 #else
                         case OPENSSL_ERR_R_NESTED_ASN1_ERROR:
@@ -126,7 +126,7 @@ namespace NuGet.Commands
             }
             else
             {
-#if IS_DESKTOP
+#if NETFRAMEWORK
                 try
                 {
                     cert = new X509Certificate2(options.CertificatePath);
@@ -177,7 +177,7 @@ namespace NuGet.Commands
                 resultCollection = store.Certificates.Find(X509FindType.FindBySubjectName, options.SubjectName, validOnly);
             }
 
-#if IS_DESKTOP
+#if NETFRAMEWORK
             store.Close();
 #endif
 
